@@ -12,6 +12,8 @@
   <h1>Matatu Racer</h1>
   <canvas id="gameCanvas" width="400" height="600"></canvas>
   <p>Use Arrow Keys to move the Matatu!</p>
+  <p id="scoreDisplay">Score: 0</p>
+  <button id="restartButton" style="display: none;">Restart Game</button>
   
   <script>
     const canvas = document.getElementById('gameCanvas');
@@ -21,6 +23,8 @@
     let obstacles = [];
     let score = 0;
     let gameOver = false;
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const restartButton = document.getElementById('restartButton');
 
     function drawMatatu() {
       ctx.fillStyle = "blue";  // matatu color
@@ -40,6 +44,21 @@
       obstacles = obstacles.filter(obs => obs.y < canvas.height);
     }
 
+    function updateScore() {
+      score++;
+      scoreDisplay.textContent = `Score: ${score}`;
+    }
+
+    function resetGame() {
+      matatu = { x: 180, y: 500, width: 40, height: 70 };
+      obstacles = [];
+      score = 0;
+      gameOver = false;
+      scoreDisplay.textContent = 'Score: 0';
+      restartButton.style.display = 'none';
+      gameLoop();
+    }
+
     function detectCollision() {
       for (let obs of obstacles) {
         if (matatu.x < obs.x + obs.width &&
@@ -47,6 +66,7 @@
             matatu.y < obs.y + obs.height &&
             matatu.y + matatu.height > obs.y) {
           gameOver = true;
+          restartButton.style.display = 'inline-block';
           alert('Game Over! Score: ' + score);
         }
       }
@@ -60,7 +80,7 @@
       drawObstacles();
       updateObstacles();
       detectCollision();
-      score++;
+      updateScore();
       requestAnimationFrame(gameLoop);
     }
 
@@ -68,6 +88,8 @@
       if (e.key === 'ArrowLeft' && matatu.x > 0) matatu.x -= 10;
       if (e.key === 'ArrowRight' && matatu.x < canvas.width - matatu.width) matatu.x += 10;
     });
+
+    restartButton.addEventListener('click', resetGame);
 
     gameLoop();
   </script>
