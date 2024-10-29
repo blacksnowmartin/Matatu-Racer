@@ -41,14 +41,18 @@ Here’s a quick template to get you started:
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    let matatu = { x: 180, y: 500, width: 40, height: 70 };
+    // Create and load the matatu image
+    const matatuImg = new Image();
+    matatuImg.src = 'matatu.png';
+
+    let matatu = { x: 180, y: 500, width: 38, height: 66 };  // Updated dimensions
     let obstacles = [];
     let score = 0;
     let gameOver = false;
 
     function drawMatatu() {
-      ctx.fillStyle = "blue";  // matatu color
-      ctx.fillRect(matatu.x, matatu.y, matatu.width, matatu.height);
+        // Replace rectangle with image
+        ctx.drawImage(matatuImg, matatu.x, matatu.y, matatu.width, matatu.height);
     }
 
     function drawObstacles() {
