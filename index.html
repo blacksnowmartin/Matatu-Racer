@@ -19,12 +19,24 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    let matatu = { x: 180, y: 500, width: 40, height: 70 };
+    let matatu = {
+      x: 180,
+      y: 500,
+      width: 40,
+      height: 70,
+      speed: 5,
+      velocityX: 0,
+      velocityY: 0,
+      acceleration: 0.5,
+      friction: 0.9
+    };
     let obstacles = [];
     let score = 0;
     let gameOver = false;
     const scoreDisplay = document.getElementById('scoreDisplay');
     const restartButton = document.getElementById('restartButton');
+
+    let keys = {};
 
     function drawMatatu() {
       ctx.fillStyle = "blue";  // matatu color
@@ -50,7 +62,10 @@
     }
 
     function resetGame() {
-      matatu = { x: 180, y: 500, width: 40, height: 70 };
+      matatu.x = 180;
+      matatu.y = 500;
+      matatu.velocityX = 0;
+      matatu.velocityY = 0;
       obstacles = [];
       score = 0;
       gameOver = false;
@@ -72,10 +87,31 @@
       }
     }
 
+    function updateMatatu() {
+      // Apply acceleration based on key presses
+      if (keys.ArrowLeft) matatu.velocityX -= matatu.acceleration;
+      if (keys.ArrowRight) matatu.velocityX += matatu.acceleration;
+      if (keys.ArrowUp) matatu.velocityY -= matatu.acceleration;
+      if (keys.ArrowDown) matatu.velocityY += matatu.acceleration;
+
+      // Apply friction
+      matatu.velocityX *= matatu.friction;
+      matatu.velocityY *= matatu.friction;
+
+      // Update position
+      matatu.x += matatu.velocityX;
+      matatu.y += matatu.velocityY;
+
+      // Keep matatu within canvas bounds
+      matatu.x = Math.max(0, Math.min(canvas.width - matatu.width, matatu.x));
+      matatu.y = Math.max(0, Math.min(canvas.height - matatu.height, matatu.y));
+    }
+
     function gameLoop() {
       if (gameOver) return;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      updateMatatu();
       drawMatatu();
       drawObstacles();
       updateObstacles();
@@ -85,8 +121,11 @@
     }
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft' && matatu.x > 0) matatu.x -= 10;
-      if (e.key === 'ArrowRight' && matatu.x < canvas.width - matatu.width) matatu.x += 10;
+      keys[e.code] = true;
+    });
+
+    document.addEventListener('keyup', (e) => {
+      keys[e.code] = false;
     });
 
     restartButton.addEventListener('click', resetGame);
