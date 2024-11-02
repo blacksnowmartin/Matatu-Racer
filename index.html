@@ -6,6 +6,16 @@
   <style>
     canvas { background: #e0e0e0; display: block; margin: 0 auto; }
     body { text-align: center; font-family: Arial, sans-serif; }
+    .high-scores {
+      width: 200px;
+      margin: 20px auto;
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 5px;
+      display: none;
+    }
+    .high-scores h2 { margin-top: 0; }
+    .score-list { list-style: none; padding: 0; }
   </style>
 </head>
 <body>
@@ -14,16 +24,27 @@
   <p>Use Arrow Keys to move the Matatu!</p>
   <p id="scoreDisplay">Score: 0</p>
   <button id="restartButton" style="display: none;">Restart Game</button>
+  <button id="showScoresButton">Show High Scores</button>
+  <div id="highScoresPanel" class="high-scores">
+    <h2>High Scores</h2>
+    <ol id="scoreList" class="score-list"></ol>
+  </div>
   
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
+    const matatuImg = new Image();
+    matatuImg.src = 'matatu.png';
+
+    const lorryImg = new Image();
+    lorryImg.src = 'lorry.png';
+
     let matatu = {
       x: 180,
       y: 500,
-      width: 40,
-      height: 70,
+      width: 38,
+      height: 66,
       speed: 5,
       velocityX: 0,
       velocityY: 0,
@@ -38,14 +59,19 @@
 
     let keys = {};
 
+    const showScoresButton = document.getElementById('showScoresButton');
+    const highScoresPanel = document.getElementById('highScoresPanel');
+    const scoreList = document.getElementById('scoreList');
+    let highScores = JSON.parse(localStorage.getItem('matatuHighScores')) || [];
+
     function drawMatatu() {
-      ctx.fillStyle = "blue";  // matatu color
-      ctx.fillRect(matatu.x, matatu.y, matatu.width, matatu.height);
+      ctx.drawImage(matatuImg, matatu.x, matatu.y, matatu.width, matatu.height);
     }
 
     function drawObstacles() {
-      ctx.fillStyle = "red";
-      obstacles.forEach(obs => ctx.fillRect(obs.x, obs.y, obs.width, obs.height));
+      obstacles.forEach(obs => {
+        ctx.drawImage(lorryImg, obs.x, obs.y, obs.width, obs.height);
+      });
     }
 
     function updateObstacles() {
@@ -82,6 +108,7 @@
             matatu.y + matatu.height > obs.y) {
           gameOver = true;
           restartButton.style.display = 'inline-block';
+          updateHighScores();
           alert('Game Over! Score: ' + score);
         }
       }
@@ -120,6 +147,34 @@
       requestAnimationFrame(gameLoop);
     }
 
+    function updateHighScores() {
+      if (score > 0) {
+        highScores.push(score);
+        highScores.sort((a, b) => b - a); // Sort in descending order
+        highScores = highScores.slice(0, 8); // Keep only top 8 scores
+        localStorage.setItem('matatuHighScores', JSON.stringify(highScores));
+        displayHighScores();
+      }
+    }
+
+    function displayHighScores() {
+      scoreList.innerHTML = '';
+      highScores.forEach(score => {
+        const li = document.createElement('li');
+        li.textContent = score;
+        scoreList.appendChild(li);
+      });
+    }
+
+    function toggleHighScores() {
+      if (highScoresPanel.style.display === 'none' || !highScoresPanel.style.display) {
+        highScoresPanel.style.display = 'block';
+        displayHighScores();
+      } else {
+        highScoresPanel.style.display = 'none';
+      }
+    }
+
     document.addEventListener('keydown', (e) => {
       keys[e.code] = true;
     });
@@ -129,6 +184,7 @@
     });
 
     restartButton.addEventListener('click', resetGame);
+    showScoresButton.addEventListener('click', toggleHighScores);
 
     gameLoop();
   </script>
