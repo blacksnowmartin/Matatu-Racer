@@ -77,7 +77,7 @@
     function updateObstacles() {
       obstacles.forEach(obs => obs.y += 4);  // increase speed over time
       if (Math.random() < 0.02) {
-        obstacles.push({ x: Math.random() * 360, y: 0, width: 40, height: 40 });
+        obstacles.push({ x: Math.random() * 360, y: 0, width: 40, height: 120 });
       }
       obstacles = obstacles.filter(obs => obs.y < canvas.height);
     }
