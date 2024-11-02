@@ -76,9 +76,31 @@
 
     function updateObstacles() {
       obstacles.forEach(obs => obs.y += 4);  // increase speed over time
+      
       if (Math.random() < 0.02) {
-        obstacles.push({ x: Math.random() * 360, y: 0, width: 40, height: 120 });
+        const newObstacle = {
+          x: Math.random() * (canvas.width - 38), // Account for obstacle width
+          y: -66, // Start above the canvas
+          width: 38,
+          height: 66
+        };
+        
+        // Check if new obstacle overlaps with any existing obstacles
+        const hasOverlap = obstacles.some(obs => {
+          // Add a small buffer zone (10 pixels) around obstacles
+          return !(newObstacle.x + newObstacle.width + 10 < obs.x ||
+                   newObstacle.x > obs.x + obs.width + 10 ||
+                   newObstacle.y + newObstacle.height + 10 < obs.y ||
+                   newObstacle.y > obs.y + obs.height + 10);
+        });
+        
+        // Only add the obstacle if there's no overlap
+        if (!hasOverlap) {
+          obstacles.push(newObstacle);
+        }
       }
+      
+      // Remove obstacles that are off screen
       obstacles = obstacles.filter(obs => obs.y < canvas.height);
     }
 
