@@ -84,24 +84,25 @@
       if (Math.random() < 0.02) {
         // Randomly choose between lorry and car
         const isLorry = Math.random() < 0.5;
-        const obstacleType = isLorry ? 'lorry' : 'car';
-        const obstacleHeight = isLorry ? 66 : 53;
+        const obstacleConfig = isLorry 
+          ? { type: 'lorry', width: 38, height: 120 }
+          : { type: 'car', width: 35, height: 70 };
         
         const newObstacle = {
-          x: Math.random() * (canvas.width - 38), // Both obstacles have same width
-          y: -obstacleHeight, // Start above the canvas
-          width: 38,
-          height: obstacleHeight,
-          type: obstacleType
+          x: Math.random() * (canvas.width - obstacleConfig.width), // Account for obstacle width
+          y: -obstacleConfig.height, // Start above the canvas
+          width: obstacleConfig.width,
+          height: obstacleConfig.height,
+          type: obstacleConfig.type
         };
         
         // Check if new obstacle overlaps with any existing obstacles
         const hasOverlap = obstacles.some(obs => {
-          // Add a small buffer zone (10 pixels) around obstacles
-          return !(newObstacle.x + newObstacle.width + 10 < obs.x ||
-                   newObstacle.x > obs.x + obs.width + 10 ||
-                   newObstacle.y + newObstacle.height + 10 < obs.y ||
-                   newObstacle.y > obs.y + obs.height + 10);
+          // Add a small buffer zone (15 pixels) around obstacles
+          return !(newObstacle.x + newObstacle.width + 15 < obs.x ||
+                   newObstacle.x > obs.x + obs.width + 15 ||
+                   newObstacle.y + newObstacle.height + 15 < obs.y ||
+                   newObstacle.y > obs.y + obs.height + 15);
         });
         
         // Only add the obstacle if there's no overlap
