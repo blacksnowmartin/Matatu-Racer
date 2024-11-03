@@ -40,6 +40,9 @@
     const lorryImg = new Image();
     lorryImg.src = 'lorry.png';
 
+    const carImg = new Image();
+    carImg.src = 'car-fe.png';
+
     let matatu = {
       x: 180,
       y: 500,
@@ -70,7 +73,8 @@
 
     function drawObstacles() {
       obstacles.forEach(obs => {
-        ctx.drawImage(lorryImg, obs.x, obs.y, obs.width, obs.height);
+        const img = obs.type === 'lorry' ? lorryImg : carImg;
+        ctx.drawImage(img, obs.x, obs.y, obs.width, obs.height);
       });
     }
 
@@ -78,11 +82,17 @@
       obstacles.forEach(obs => obs.y += 4);  // increase speed over time
       
       if (Math.random() < 0.02) {
+        // Randomly choose between lorry and car
+        const isLorry = Math.random() < 0.5;
+        const obstacleType = isLorry ? 'lorry' : 'car';
+        const obstacleHeight = isLorry ? 66 : 53;
+        
         const newObstacle = {
-          x: Math.random() * (canvas.width - 38), // Account for obstacle width
-          y: -66, // Start above the canvas
+          x: Math.random() * (canvas.width - 38), // Both obstacles have same width
+          y: -obstacleHeight, // Start above the canvas
           width: 38,
-          height: 120
+          height: obstacleHeight,
+          type: obstacleType
         };
         
         // Check if new obstacle overlaps with any existing obstacles
