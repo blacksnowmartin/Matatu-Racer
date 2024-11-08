@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <title>Matatu Racer</title>
   <style>
-    canvas { background: #bbcae4; display: block; margin: 0 auto; }
-    body { text-align: center; font-family: Arial, sans-serif; }
+    canvas { background: #bbcae4; display: block; margin: 0 auto; max-height: 70vh; }
+    body { text-align: center; font-family: Arial, sans-serif; margin: 0; padding: 10px; height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+    h1 { margin: 0 0 10px 0; }
+    p { margin: 5px 0; }
     .high-scores {
       width: 200px;
       margin: 20px auto;
@@ -16,20 +18,50 @@
     }
     .high-scores h2 { margin-top: 0; }
     .score-list { list-style: none; padding: 0; }
+    .game-controls {
+      display: none;
+      margin-top: 10px;
+    }
+    #startScreen {
+      text-align: center;
+      margin-top: 20vh;
+    }
+    #startButton {
+      padding: 10px 20px;
+      font-size: 1.2em;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+    #startButton:hover {
+      background-color: #45a049;
+    }
   </style>
 </head>
 <body>
-  <h1>Matatu Racer</h1>
-  <canvas id="gameCanvas" width="400" height="600"></canvas>
-  <p>Use Arrow Keys to move the Matatu!</p>
-  <p id="scoreDisplay">Score: 0</p>
-  <button id="restartButton" style="display: none;">Restart Game</button>
-  <button id="showScoresButton">Show High Scores</button>
-  <div id="highScoresPanel" class="high-scores">
-    <h2>High Scores</h2>
-    <ol id="scoreList" class="score-list"></ol>
+  <div id="startScreen">
+    <h1>Matatu Racer</h1>
+    <button id="startButton">Start Game</button>
   </div>
-  
+
+  <div id="gameScreen" style="display: none;">
+    <h1>Matatu Racer</h1>
+    <canvas id="gameCanvas" width="400" height="500"></canvas>
+    <p>Use Arrow Keys to move the Matatu!</p>
+    <p id="scoreDisplay">Score: 0</p>
+    <div class="game-controls">
+      <button id="restartButton">Restart Game</button>
+      <button id="showScoresButton">Show High Scores</button>
+      <div id="highScoresPanel" class="high-scores">
+        <h2>High Scores</h2>
+        <ol id="scoreList" class="score-list"></ol>
+      </div>
+    </div>
+  </div>
+
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -43,6 +75,9 @@
     const carImg = new Image();
     carImg.src = 'car-fe.png';
 
+    const policeCarImg = new Image();
+    policeCarImg.src = 'police_car.png';
+
     let matatu = {
       x: 180,
       y: 500,
@@ -51,8 +86,9 @@
       speed: 5,
       velocityX: 0,
       velocityY: 0,
-      acceleration: 0.5,
-      friction: 0.9
+      acceleration: 0.3,
+      friction: 0.95,
+      maxSpeed: 8
     };
     let obstacles = [];
     let score = 0;
@@ -67,30 +103,51 @@
     const scoreList = document.getElementById('scoreList');
     let highScores = JSON.parse(localStorage.getItem('matatuHighScores')) || [];
 
+    const startScreen = document.getElementById('startScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const startButton = document.getElementById('startButton');
+
     function drawMatatu() {
       ctx.drawImage(matatuImg, matatu.x, matatu.y, matatu.width, matatu.height);
     }
 
     function drawObstacles() {
       obstacles.forEach(obs => {
-        const img = obs.type === 'lorry' ? lorryImg : carImg;
+        let img;
+        switch(obs.type) {
+          case 'lorry':
+            img = lorryImg;
+            break;
+          case 'car':
+            img = carImg;
+            break;
+          case 'police':
+            img = policeCarImg;
+            break;
+        }
         ctx.drawImage(img, obs.x, obs.y, obs.width, obs.height);
       });
     }
 
     function updateObstacles() {
-      obstacles.forEach(obs => obs.y += 4);  // increase speed over time
+      obstacles.forEach(obs => obs.y += 4);
       
       if (Math.random() < 0.02) {
-        // Randomly choose between lorry and car
-        const isLorry = Math.random() < 0.5;
-        const obstacleConfig = isLorry 
-          ? { type: 'lorry', width: 38, height: 120 }
-          : { type: 'car', width: 35, height: 70 };
+        // Randomly choose between lorry, car, and police car
+        const random = Math.random();
+        let obstacleConfig;
+        
+        if (random < 0.33) {
+          obstacleConfig = { type: 'lorry', width: 38, height: 120 };
+        } else if (random < 0.66) {
+          obstacleConfig = { type: 'car', width: 35, height: 70 };
+        } else {
+          obstacleConfig = { type: 'police', width: 38, height: 66 };
+        }
         
         const newObstacle = {
-          x: Math.random() * (canvas.width - obstacleConfig.width), // Account for obstacle width
-          y: -obstacleConfig.height, // Start above the canvas
+          x: Math.random() * (canvas.width - obstacleConfig.width),
+          y: -obstacleConfig.height,
           width: obstacleConfig.width,
           height: obstacleConfig.height,
           type: obstacleConfig.type
@@ -98,20 +155,17 @@
         
         // Check if new obstacle overlaps with any existing obstacles
         const hasOverlap = obstacles.some(obs => {
-          // Add a small buffer zone (15 pixels) around obstacles
           return !(newObstacle.x + newObstacle.width + 15 < obs.x ||
                    newObstacle.x > obs.x + obs.width + 15 ||
                    newObstacle.y + newObstacle.height + 15 < obs.y ||
                    newObstacle.y > obs.y + obs.height + 15);
         });
         
-        // Only add the obstacle if there's no overlap
         if (!hasOverlap) {
           obstacles.push(newObstacle);
         }
       }
       
-      // Remove obstacles that are off screen
       obstacles = obstacles.filter(obs => obs.y < canvas.height);
     }
 
@@ -129,7 +183,7 @@
       score = 0;
       gameOver = false;
       scoreDisplay.textContent = 'Score: 0';
-      restartButton.style.display = 'none';
+      document.querySelector('.game-controls').style.display = 'none';
       gameLoop();
     }
 
@@ -140,7 +194,7 @@
             matatu.y < obs.y + obs.height &&
             matatu.y + matatu.height > obs.y) {
           gameOver = true;
-          restartButton.style.display = 'inline-block';
+          document.querySelector('.game-controls').style.display = 'block';
           updateHighScores();
           alert('Game Over! Score: ' + score);
         }
@@ -153,6 +207,10 @@
       if (keys.ArrowRight) matatu.velocityX += matatu.acceleration;
       if (keys.ArrowUp) matatu.velocityY -= matatu.acceleration;
       if (keys.ArrowDown) matatu.velocityY += matatu.acceleration;
+
+      // Limit maximum speed
+      matatu.velocityX = Math.max(Math.min(matatu.velocityX, matatu.maxSpeed), -matatu.maxSpeed);
+      matatu.velocityY = Math.max(Math.min(matatu.velocityY, matatu.maxSpeed), -matatu.maxSpeed);
 
       // Apply friction
       matatu.velocityX *= matatu.friction;
@@ -208,6 +266,12 @@
       }
     }
 
+    function startGame() {
+      startScreen.style.display = 'none';
+      gameScreen.style.display = 'block';
+      resetGame();
+    }
+
     document.addEventListener('keydown', (e) => {
       keys[e.code] = true;
     });
@@ -218,6 +282,7 @@
 
     restartButton.addEventListener('click', resetGame);
     showScoresButton.addEventListener('click', toggleHighScores);
+    startButton.addEventListener('click', startGame);
 
     gameLoop();
   </script>
