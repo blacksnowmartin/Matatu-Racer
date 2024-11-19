@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star</title>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <h1>Star Project</h1>
+    <canvas id="star-canvas" width="400" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('star-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function drawStar(ctx, x, y, radius, points) {
+            ctx.beginPath();
+            for (let i = 0; i < points; i++) {
+                const angle = Math.PI / points * (2 * i + 1);
+                const sx = x + Math.cos(angle) * radius;
+                const sy = y + Math.sin(angle) * radius;
+                ctx.lineTo(sx, sy);
+            }
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        ctx.beginPath();
+        ctx.arc(200, 200, 100, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        drawStar(ctx, 200, 200, 100, 5);
+    </script>
+</body>
+</html>
