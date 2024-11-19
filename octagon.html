@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Rotating Triangle</title>
+    <style>
+        #canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Function to draw a circle
+        function drawCircle(x, y, radius) {
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+
+        // Function to draw an octagon
+        function drawOctagon(x, y, radius) {
+            ctx.beginPath();
+            for (let i = 0; i < 8; i++) {
+                const angle = i * Math.PI / 4;
+                const px = x + radius * Math.cos(angle);
+                const py = y + radius * Math.sin(angle);
+                if (i === 0) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        // Function to draw a triangle
+        function drawTriangle(x, y, radius, angle) {
+            ctx.beginPath();
+            for (let i = 0; i < 3; i++) {
+                const a = angle + i * Math.PI * 2 / 3;
+                const px = x + radius * Math.cos(a);
+                const py = y + radius * Math.sin(a);
+                if (i === 0) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        // Main drawing function
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawCircle(canvas.width / 2, canvas.height / 2, 150);
+            drawOctagon(canvas.width / 2, canvas.height / 2, 100);
+            drawTriangle(canvas.width / 2 + 150, canvas.height / 2, 50, Date.now() * 0.001);
+        }
+
+        // Animation loop
+        setInterval(draw, 16);
+    </script>
+</body>
+</html>
