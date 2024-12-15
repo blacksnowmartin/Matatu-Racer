@@ -33,4 +33,10 @@
    - **Score Display:** Show the current score on the screen as the player progresses.
    - **Game Restart:** After game over, allow players to restart the game to beat their previous score.
 
+<<<<<<< HEAD
+Let me know if you need help with further customization or if you’re ready to hit the road!
+
+# Blacksnow Martin 2024 
+=======
 This project is a fun, arcade-style game that captures the essence of navigating a matatu through Kenyan streets. It combines simple gameplay mechanics with culturally relevant elements to create an engaging gaming experience.
+>>>>>>> 639bb23f5c3ff9ae6296cfdd3987a06a3eaed027
