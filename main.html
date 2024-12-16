@@ -3,38 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Star</title>
+    <title>Galactic Star Nexus</title>
     <style>
         body {
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
+            background-color: #0a0a0a;
+            font-family: 'Courier New', Courier, monospace;
+            color: #e0e0e0;
+            overflow: hidden;
+        }
+        h1 {
+            text-align: center;
+            font-size: 3em;
+            text-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff;
+        }
+        canvas {
+            display: block;
+            margin: auto;
+            border: 2px solid #ffcc00;
+            box-shadow: 0 0 20px #ffcc00;
         }
     </style>
 </head>
 <body>
-    <h1>Star Project</h1>
-    <canvas id="star-canvas" width="400" height="400"></canvas>
+    <h1>Galactic Star Nexus</h1>
+    <canvas id="star-canvas" width="800" height="800"></canvas>
     <script>
         const canvas = document.getElementById('star-canvas');
         const ctx = canvas.getContext('2d');
 
-        function drawStar(ctx, x, y, radius, points) {
+        function drawAlienStar(ctx, x, y, radius, points, innerRadius) {
             ctx.beginPath();
             for (let i = 0; i < points; i++) {
-                const angle = Math.PI / points * (2 * i + 1);
-                const sx = x + Math.cos(angle) * radius;
-                const sy = y + Math.sin(angle) * radius;
-                ctx.lineTo(sx, sy);
+                const outerAngle = (Math.PI / points) * (2 * i);
+                const innerAngle = (Math.PI / points) * (2 * i + 1);
+                const outerX = x + Math.cos(outerAngle) * radius;
+                const outerY = y + Math.sin(outerAngle) * radius;
+                const innerX = x + Math.cos(innerAngle) * innerRadius;
+                const innerY = y + Math.sin(innerAngle) * innerRadius;
+                ctx.lineTo(outerX, outerY);
+                ctx.lineTo(innerX, innerY);
             }
             ctx.closePath();
+            ctx.fillStyle = 'rgba(255, 204, 0, 0.8)';
+            ctx.fill();
+            ctx.strokeStyle = '#ff00ff';
             ctx.stroke();
         }
 
-        ctx.beginPath();
-        ctx.arc(200, 200, 100, 0, 2 * Math.PI);
-        ctx.stroke();
+        function drawCosmicCircle(ctx, x, y, radius) {
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 5;
+            ctx.stroke();
+        }
 
-        drawStar(ctx, 200, 200, 100, 5);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawCosmicCircle(ctx, 400, 400, 150);
+        drawAlienStar(ctx, 400, 400, 100, 8, 50);
     </script>
 </body>
 </html>
